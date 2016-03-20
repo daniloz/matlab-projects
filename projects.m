@@ -285,4 +285,5 @@ end
 
 if nargout==0
     varargout = [];
+    varargout = cell(0,0);
 end
