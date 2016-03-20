@@ -44,7 +44,10 @@ Available commands are:
 
 ## Note
 
-All projects are stored in the ```%userpath%/projects.mat```. This file with the empty "default" project is created at the first run of the script.
+All projects are stored in the ```%dropboxPath%/matlab/projects.mat```. This file with the empty "default" project is created at the first run of the script.
+userpath(fullfile(dropboxPath,'matlab')). For dropbox sync to work userpath must be on your Dropbox path.
+
+Requires http://www.mathworks.com/matlabcentral/fileexchange/47644-dropboxpath-m to function.
 
 First project always has name "default"
 
