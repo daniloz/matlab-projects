@@ -53,7 +53,7 @@ if verLessThan('matlab','7.12')
 end
 
 if isempty(userpath)
-    userpath('reset');
+    userpath(fullfile(dropboxPath,'matlab'))
 end
 
 fpath = userpath;
@@ -66,7 +66,7 @@ if ~exist(fpath, 'file')    % first time run
     projectsList = [];
     projectsList(1).ProjectName = 'default';
     projectsList(1).OpenedFiles = {};
-    projectsList(1).ActiveDir = userpath;
+    projectsList(1).ActiveDir = fullfileparts(strrep(userpath, dropboxPath, '%dropboxpath%'));
     projectsList(1).ActiveDir(end) = [];
     
     activeProject = 1;
@@ -151,9 +151,12 @@ switch lower(cmd)
         openDocuments = matlab.desktop.editor.getAll;
         filenames = {openDocuments.Filename};
         
+        filenames=strrep(filenames, dropboxPath, '%dropboxpath%');
+        filenames=fullfileparts(filenames);
+        
         projectsList(ind).ProjectName = prjname;
         projectsList(ind).OpenedFiles = filenames;
-        projectsList(ind).ActiveDir = pwd;
+        projectsList(ind).ActiveDir = fullfileparts(strrep(pwd, dropboxPath, '%dropboxpath%'));
         activeProject = ind;
         
         save(fpath, 'projectsList', 'activeProject');
@@ -177,8 +180,12 @@ switch lower(cmd)
             return
         end
         
-        filenames = projectsList(ind).OpenedFiles;
-        
+        filenames_cellform = projectsList(ind).OpenedFiles;
+        for i=1:length(filenames_cellform)
+            filenames{i}=fullfile(filenames_cellform{i}{:});
+        end         
+        filenames=strrep(filenames,'%dropboxpath%',dropboxPath);
+               
         for ii = 1:length(filenames)
             if exist(filenames{ii}, 'file')
                 matlab.desktop.editor.openDocument(filenames{ii});
@@ -187,10 +194,11 @@ switch lower(cmd)
             end
         end
         
-        try
-            cd(projectsList(ind).ActiveDir);
+        try 
+            ActiveDir=strrep(fullfile(projectsList(ind).ActiveDir{:}),'%dropboxpath%',dropboxPath);
+            cd(ActiveDir);
         catch
-            warning(['Directory "' projectsList(ind).ActiveDir '" does not exist'])
+            warning(['Directory "' ActiveDir '" does not exist'])
         end
         
         activeProject = ind;
@@ -284,6 +292,21 @@ switch lower(cmd)
 end
 
 if nargout==0
-    varargout = [];
     varargout = cell(0,0);
+end
+
+function filepartsarray=fullfileparts(filepathfile)
+%fullfileparts(pwd);fullfile(ans{:});strcmp(ans,pwd)
+    
+if ~iscell(filepathfile)
+    filepathfile=cellstr(filepathfile);
+end
+for i=1:length(filepathfile)
+    filepartsarray{1,i}=strsplit(filepathfile{i},filesep);
+    if ~ispc && isempty(filepartsarray{1,i}{1})
+        filepartsarray{1,i}(1)={filesep};
+    end
+end
+if length(filepartsarray)==1
+    filepartsarray=filepartsarray{:};
 end
