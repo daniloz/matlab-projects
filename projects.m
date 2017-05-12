@@ -57,7 +57,7 @@ if isempty(userpath)
 end
 
 fpath = userpath;
-fpath = fullfile(fpath(1:end-1), 'projects.mat');
+fpath = fullfile(fpath, 'projects.mat');
 
 if ~exist(fpath, 'file')    % first time run
     openDocuments = matlab.desktop.editor.getAll;
